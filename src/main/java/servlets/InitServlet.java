@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import main.java.mongoutil.MongoConn;
-import main.java.mysqlutil.HibernateUtil;
+import main.java.util.mongoutil.MongoConn;
+import main.java.util.mysqlutil.HibernateUtil;
 import main.java.util.Config;
 import main.java.util.Log4jLogger;
 

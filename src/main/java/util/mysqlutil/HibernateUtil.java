@@ -1,4 +1,4 @@
-package main.java.mysqlutil;
+package main.java.util.mysqlutil;
 
 import java.util.Properties;
 

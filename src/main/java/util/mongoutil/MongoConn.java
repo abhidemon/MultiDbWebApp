@@ -1,10 +1,10 @@
-package main.java.mongoutil;
+package main.java.util.mongoutil;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
-import main.java.servlets.DataService;
+import main.java.servlets.DataServlet;
 import main.java.util.Config;
 import main.java.util.Log4jLogger;
 
