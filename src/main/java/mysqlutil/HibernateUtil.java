@@ -1,10 +1,14 @@
-package mysqlutil;
+package main.java.mysqlutil;
+
+import java.util.Properties;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
+
+import main.java.util.Config;
 
 /**
  * Created by abhishek.singh on 12/22/15.
@@ -16,18 +20,22 @@ public class HibernateUtil {
     private static ServiceRegistry serviceRegistry;
     static int mysqlValidityTimeoutInSec=10;
 
-    private static synchronized void init(){
+    public static synchronized void init(){
+    	if (sessionFactory!=null){
+    		return;
+    	}
         try {
-            String host             ="";
-            String dbName           ="";
-            String username         ="";
-            String password         ="";
-            String mysqlPoolSize    ="";
+        	Properties properties = Config.getProperties();
+            String host             = properties.getProperty("mysqlHost");
+            String dbName           = properties.getProperty("mysqlDbName");;
+            String username         = properties.getProperty("mysqlUsername");
+            //String password         = properties.getProperty("mysqlPassword");
+            String mysqlPoolSize       = "50";
 
             Configuration conf = new Configuration();
             conf.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
             conf.setProperty("hibernate.connection.username", username);
-            conf.setProperty("hibernate.connection.password", password);
+            //conf.setProperty("hibernate.connection.password", password);
             conf.setProperty("hibernate.connection.url", "jdbc:mysql://" + host + ":3306/" + dbName);
             conf.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLInnoDBDialect");
             conf.setProperty("hibernate.current_session_context_class", "thread");
@@ -58,9 +66,7 @@ public class HibernateUtil {
     }
 
     public static SessionFactory getSessionFactory() {
-        if(sessionFactory==null){
-            init();
-        }
+        
         return sessionFactory;
     }
 

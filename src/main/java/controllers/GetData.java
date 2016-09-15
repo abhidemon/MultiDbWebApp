@@ -1,19 +1,17 @@
-package controllers;
+package main.java.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.Block;
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import mongoutil.MongoConn;
-import mysqlutil.HibernateUtil;
+import main.java.mongoutil.MongoConn;
+import main.java.mysqlutil.HibernateUtil;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -28,12 +26,14 @@ public class GetData {
 
 
     static ObjectMapper objectMapper = new ObjectMapper();
-    private static String dbname = "test";
-    private static String collName = "abc";
-
-    private static final String baseSelectQuery = "SELECT * FROM db1.tab1 where ";
+    private static String dbname = "db1";
+    private static String collName = "employees";
+    public static final String[] ignorableMongoDbColumns = {"_id"} ; 
+    
+    private static final String baseSelectQuery = "SELECT * FROM "+dbname+"."+collName+" where ";
     private static final String[] fieldsInMysqlTable = {"name","age"};
     private static int maxRowsAllowed = 1000;
+    
 
 
     public static String getData(String dbSource,String field,String value) throws JsonProcessingException, SQLException {
@@ -51,17 +51,20 @@ public class GetData {
     public static String getDataFromMongoDb(String field,String value) throws JsonProcessingException {
 
         MongoDatabase db = MongoConn.getMongoClient().getDatabase(dbname);
-        Bson condition =  new Document(field,value);
+        Document condition =  new Document(field,value);
+        Document projection =  new Document();
+        
+        for (String ignoreableField : ignorableMongoDbColumns ){
+        	projection.append(ignoreableField,0);
+        }
+        
         final List<Document> resultList = new LinkedList<Document>();
-        FindIterable<Document> resultItr = db.getCollection(collName).find(condition);
-        resultItr.forEach(new Block<Document>() {
-
-            public void apply(final Document document) {
-                resultList.add(document);
-                System.out.println(document);
-
-            }
-        });
+        MongoCursor<Document> resultItr = db.getCollection(collName).find(condition).projection(projection).iterator();
+        
+        while(resultItr.hasNext()){
+        	Document doc = resultItr.next();
+        	resultList.add(doc);
+        }
         return objectMapper.writeValueAsString(resultList);
     }
 
@@ -69,7 +72,8 @@ public class GetData {
         Session hibernateSession = HibernateUtil.getSessionFactory().openSession();
         Connection conn = ((SessionImpl) hibernateSession).connection();
         java.sql.Statement statement = conn.createStatement();
-        String fetchString = baseSelectQuery+" "+new String(field)+"="+new String(value);
+        String fetchString = baseSelectQuery+" "+new String(field)+"='"+new String(value)+"'";
+        System.out.println(fetchString);
         java.sql.ResultSet rs = statement.executeQuery(fetchString);
         List<Map<String,Object>> listOfEntries = new LinkedList();
         while(rs.next()){
