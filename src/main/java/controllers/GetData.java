@@ -8,6 +8,10 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import main.java.mongoutil.MongoConn;
 import main.java.mysqlutil.HibernateUtil;
+import main.java.servlets.DataService;
+import main.java.util.Log4jLogger;
+
+import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.hibernate.Session;
@@ -33,11 +37,13 @@ public class GetData {
     private static final String baseSelectQuery = "SELECT * FROM "+dbname+"."+collName+" where ";
     private static final String[] fieldsInMysqlTable = {"name","age"};
     private static int maxRowsAllowed = 1000;
+    private static Logger logger = Log4jLogger.getLogger(GetData.class);
+	
     
-
 
     public static String getData(String dbSource,String field,String value) throws JsonProcessingException, SQLException {
         dbSource = dbSource.toLowerCase();
+        
         switch (dbSource){
             case "mongodb": return getDataFromMongoDb(field,value);
 
@@ -45,11 +51,12 @@ public class GetData {
 
             default: return "Unknown dbSource : "+dbSource+" has been selected. Currently only 'mongodb' and 'mysql'  are supported.";
         }
+        
 
     }
 
     public static String getDataFromMongoDb(String field,String value) throws JsonProcessingException {
-
+    	logger.info("Fetching from mongodb.");
         MongoDatabase db = MongoConn.getMongoClient().getDatabase(dbname);
         Document condition =  new Document(field,value);
         Document projection =  new Document();
@@ -69,12 +76,13 @@ public class GetData {
     }
 
     public static String getDataFromMySql(String field,String value) throws SQLException, JsonProcessingException {
-        Session hibernateSession = HibernateUtil.getSessionFactory().openSession();
+        logger.info("Retrieving data from mysql");
+    	Session hibernateSession = HibernateUtil.getSessionFactory().openSession();
         Connection conn = ((SessionImpl) hibernateSession).connection();
         java.sql.Statement statement = conn.createStatement();
         String fetchString = baseSelectQuery+" "+new String(field)+"='"+new String(value)+"'";
-        System.out.println(fetchString);
-        java.sql.ResultSet rs = statement.executeQuery(fetchString);
+        logger.info("Executing Mysql Query : "+fetchString);
+    	java.sql.ResultSet rs = statement.executeQuery(fetchString);
         List<Map<String,Object>> listOfEntries = new LinkedList();
         while(rs.next()){
             Map<String,Object> entry = new HashMap<>();
@@ -83,6 +91,7 @@ public class GetData {
             }
             listOfEntries.add(entry);
         }
+        logger.info("Retrived results from mysql");
         return objectMapper.writeValueAsString(listOfEntries);
     }
 

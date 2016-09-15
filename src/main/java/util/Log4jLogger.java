@@ -11,22 +11,18 @@ import java.util.Set;
 
 public class Log4jLogger {
 
-    private Logger log;
     private static Logger rootLogger;
     private static boolean initialised=false;
     
-    public Logger getLogger( Class className ) {
-    	if(initialised){
-    		return Logger.getLogger( className );
-    	}
-    	return null;
-    	
+    public static Logger getLogger( Class className ) {
+    	return Logger.getLogger( className );
     }
 
-    public static synchronized void init( Properties prop ){
+    public static synchronized void init(  ){
     	if (initialised){
     		return;
     	}
+    	Properties prop = Config.getProperties();
     	rootLogger = Logger.getRootLogger();
         switch (prop.getProperty("logLevel","INFO").toUpperCase()){
             case "DEBUG" : rootLogger.setLevel(Level.DEBUG);
@@ -44,7 +40,7 @@ public class Log4jLogger {
         }
 
 
-        org.apache.log4j.PatternLayout layout = new org.apache.log4j.PatternLayout(prop.getProperty("patternLayout","%d{ISO8601} [%t] %-5p %x - %m%n")
+        org.apache.log4j.PatternLayout layout = new org.apache.log4j.PatternLayout(prop.getProperty("patternLayout","%d{ISO8601} [%t] %-5p %c %x - %m%n")
         );
 
         try {

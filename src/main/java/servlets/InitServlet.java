@@ -10,8 +10,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
+import main.java.mongoutil.MongoConn;
 import main.java.mysqlutil.HibernateUtil;
 import main.java.util.Config;
+import main.java.util.Log4jLogger;
 
 /**
  * Servlet implementation class InitServlet
@@ -28,7 +32,11 @@ public class InitServlet extends HttpServlet {
 		InputStream is = getServletContext().getResourceAsStream("/WEB-INF/config.properties");
 		try {
 			Config.init(is);
+			Log4jLogger.init();
+			Logger logger = Log4jLogger.getLogger(InitServlet.class);
+			logger.info("Initialized Application. Starting Service.!!");
 			HibernateUtil.init();
+			MongoConn.init();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

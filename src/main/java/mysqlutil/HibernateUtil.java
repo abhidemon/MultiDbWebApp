@@ -2,13 +2,16 @@ package main.java.mysqlutil;
 
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
+import main.java.servlets.InitServlet;
 import main.java.util.Config;
+import main.java.util.Log4jLogger;
 
 /**
  * Created by abhishek.singh on 12/22/15.
@@ -19,11 +22,13 @@ public class HibernateUtil {
     private static SessionFactory sessionFactory;
     private static ServiceRegistry serviceRegistry;
     static int mysqlValidityTimeoutInSec=10;
-
+    static Logger logger = Log4jLogger.getLogger(HibernateUtil.class);
+    
     public static synchronized void init(){
     	if (sessionFactory!=null){
     		return;
     	}
+    	logger.info("Initialising Mysql for the first time.");
         try {
         	Properties properties = Config.getProperties();
             String host             = properties.getProperty("mysqlHost");
@@ -61,8 +66,11 @@ public class HibernateUtil {
             sessionFactory = conf.buildSessionFactory(serviceRegistry);
             mysqlValidityTimeoutInSec = 120;
         } catch (Exception e) {
+        	logger.error("Some error occured  while initialising Mysql.", e);
             throw new ExceptionInInitializerError(e);
         }
+        logger.info("Initialised Mysql successfully.");
+        
     }
 
     public static SessionFactory getSessionFactory() {

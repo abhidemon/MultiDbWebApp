@@ -17,7 +17,7 @@ public class Config {
         System.out.println(objectMapper.writeValueAsString(prop).replaceAll("\",","\", \n\t    ").replaceAll("\":\"", "\"     :     \""));
         properties = prop;
         System.out.println("Initialised Config. \n Initialising Log4j.");
-        Log4jLogger.init(prop);
+        Log4jLogger.init();
 	}
 
 	public static Properties getProperties() {
