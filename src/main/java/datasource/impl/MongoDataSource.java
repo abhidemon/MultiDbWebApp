@@ -11,9 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
+import main.java.datasource.dbUtils.MongoConn;
 import main.java.datasource.interfaces.DataSource;
 import main.java.util.Log4jLogger;
-import main.java.util.mongoutil.MongoConn;
 
 public class MongoDataSource implements DataSource {
 

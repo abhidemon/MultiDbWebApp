@@ -15,9 +15,9 @@ import org.hibernate.internal.SessionImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import main.java.datasource.dbUtils.HibernateUtil;
 import main.java.datasource.interfaces.DataSource;
 import main.java.util.Log4jLogger;
-import main.java.util.mysqlutil.HibernateUtil;
 
 public class MysqlDataSource implements DataSource{
 	

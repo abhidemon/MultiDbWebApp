@@ -19,7 +19,7 @@ import java.sql.SQLException;
  * Created by abhishek.singh on 14/09/16.
  */
 
-@WebServlet(name = "DataService",urlPatterns={"/hello"})
+@WebServlet(name = "DataService",urlPatterns={"/dbs"})
 public class DataServlet extends HttpServlet {
 	
 	static Logger logger = Log4jLogger.getLogger(DataServlet.class);
@@ -28,27 +28,34 @@ public class DataServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     	
 		logger.info("Got request from "+request.getRemoteAddr());
-		
+		boolean isParamsValid = true;
         try {
             String dbSource = request.getParameter("dbSource");    
             if (dbSource==null){
+            	isParamsValid = isParamsValid & false;
             	logger.warn("received null dbSource .");
-            	response.getWriter().append("Parameter dbSource cannot be left null");
+            	response.getWriter().append("Parameter dbSource cannot be left null. \n");
             }
             String field = request.getParameter("field");
             if (field==null){
+            	isParamsValid = isParamsValid & false;
             	logger.warn("received null field .");
-            	response.getWriter().append("Parameter field cannot be left null");
+            	response.getWriter().append("Parameter field cannot be left null. \n");
             }
             String value = request.getParameter("value");
             if (value==null){
+            	isParamsValid = isParamsValid & false;
             	logger.warn("received null value .");
-            	response.getWriter().append("Parameter value cannot be left null");
+            	response.getWriter().append("Parameter value cannot be left null. \n");
             }
+            
             String resp = "";
             try {
-            	DataSource dataSource = DataSourceFactory.getDataSource(dbSource);
-                resp = dataSource.getEveryDataForFieldAndValue(field, value);
+            	if (isParamsValid){
+            		DataSource dataSource = DataSourceFactory.getDataSource(dbSource);
+                    resp = dataSource.getEveryDataForFieldAndValue(field, value);	
+            	}
+            	
             } catch (SQLException e) {
                 resp = "Some Error Occured";
                 e.printStackTrace();
