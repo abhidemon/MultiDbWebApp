@@ -1,7 +1,9 @@
 package main.java.datasource.impl;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
@@ -28,24 +30,54 @@ public class MongoDataSource implements DataSource {
 	
 	
 	@Override
-	public String getEveryDataForFieldAndValue(String field, String value) throws Exception {
+	public List<Map<String,Object>> getEveryData(Map<String, Object> fieldValueMap) throws Exception {
 		logger.info("Fetching from mongodb.");
         MongoDatabase db = MongoConn.getMongoClient().getDatabase(dbname);
-        Document condition =  new Document(field,value);
+        Document condition =  new Document();
+        
+        for (String key : fieldValueMap.keySet()){
+        	condition .put(key, fieldValueMap.get(key));
+        }
+        
         Document projection =  new Document();
         
         for (String ignoreableField : ignorableMongoDbColumns ){
         	projection.append(ignoreableField,0);
         }
-        final List<Document> resultList = new LinkedList<Document>();
+        
+        final List<Map<String,Object>> resultList = new LinkedList<Map<String,Object>>();
         MongoCursor<Document> resultItr = db.getCollection(collName).find(condition).projection(projection).iterator();
+        Map<String,Object> mp = new LinkedHashMap<>();
         
         while(resultItr.hasNext()){
         	Document doc = resultItr.next();
-        	resultList.add(doc);
+        	mp.putAll(doc);
+        	resultList.add(mp);
         }
-        return objectMapper.writeValueAsString(resultList);
+        return resultList;
 		
 	}
+
+
+	@Override
+	public boolean createNewResource(Map<String, Object> fieldValuesForResource) throws Exception {
+		
+		logger.info("Fetching from mongodb.");
+        MongoDatabase db = MongoConn.getMongoClient().getDatabase(dbname);
+        Document entry =  new Document();
+        
+		for (String key : fieldValuesForResource.keySet()){
+			entry.put(key, fieldValuesForResource.get(key));
+		}
+		
+		try{
+			db.getCollection(collName).insertOne(entry);
+			return true;
+		}catch(Exception e){
+			logger.error(e);
+			return false;
+		}
+	}
+	
 
 }
